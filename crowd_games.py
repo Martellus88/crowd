@@ -12,28 +12,27 @@ def load_xls(filename):
 
 
 def write_to_xls(work_sheet, work_book, data, output_xls):
-    last_row = work_sheet[work_sheet.max_row]
     work_sheet.delete_rows(1, work_sheet.max_row)
-
     for value in data.values():
         for i in value:
             work_sheet.append(i)
-    work_sheet.append(last_row)
 
     work_book.save(output_xls)
 
 
 def clear_and_save(work_sheet, work_book, output_xls):
     work_sheet.delete_cols(7, work_sheet.max_column)
+    work_sheet[f'B{work_sheet.max_row + 1}'] = f'=sum(B1:B{work_sheet.max_row})'
     work_book.save(output_xls)
 
 
 def del_columns(work_sheet):
+    work_sheet.delete_cols(15, 6)
+    work_sheet.delete_cols(13)
+    work_sheet.delete_cols(10)
+    work_sheet.delete_cols(8)
+    work_sheet.delete_cols(3, 4)
     work_sheet.delete_cols(1)
-    work_sheet.delete_cols(2, 4)
-    work_sheet.delete_cols(3)
-    work_sheet.delete_cols(4)
-    work_sheet.delete_cols(6, 8)
 
 
 def preparation(orders_filename, output_xls):
@@ -43,9 +42,7 @@ def preparation(orders_filename, output_xls):
 
     del_columns(work_sheet)
 
-    work_sheet[f'B{max_row}'] = f'=sum(B1:B{max_row - 1})'
-
-    for i in range(1, max_row):
+    for i in range(1, max_row + 1):
         if work_sheet[f'A{i}'].value != work_sheet[f'A{i + 1}'].value:
             work_sheet[f'G{i}'] = number
             number += 1
@@ -56,10 +53,10 @@ def preparation(orders_filename, output_xls):
 def sorting(work_sheet):
     dictionary = defaultdict(list)
 
-    for row in work_sheet.iter_rows(min_row=0, values_only=True, max_row=work_sheet.max_row - 1):
+    for row in work_sheet.iter_rows(min_row=0, values_only=True):
         dictionary[row[0]].append(row)
 
-    sorted_dict = dict(sorted(dictionary.items(), key=lambda x: (len(x[1]), x[1][0][2]), reverse=True))
+    sorted_dict = dict(sorted(dictionary.items(), key=lambda x: (len(x[1]), x[1][0][2])))
 
     return sorted_dict
 
@@ -69,7 +66,7 @@ def pdf(work_sheet, input_filename, output_filename):
     pdf_pages = []
     sticker_numbers = []
 
-    for i in range(1, work_sheet.max_row):
+    for i in range(1, work_sheet.max_row + 1):
         cell_value = work_sheet[f'G{i}'].value
         if cell_value is not None:
             sticker_numbers.append(cell_value)
