@@ -37,6 +37,7 @@ def del_columns(work_sheet):
 
 def preparation(orders_filename, output_xls):
     work_book, work_sheet = load_xls(orders_filename)
+    work_sheet.delete_rows(1)
     max_row = work_sheet.max_row
     number = 0
 
